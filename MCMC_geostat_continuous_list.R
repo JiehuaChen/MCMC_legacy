@@ -1,5 +1,6 @@
-source("cont_likfunc.r")
-source("invcor_list_v2.r")
+source("main_data.R")
+source("cont_likfunc.R")
+source("invcor_list_v2.R")
 library(MASS)
 
 
@@ -62,7 +63,7 @@ for(j in 1:n.chains){
 	alpha.draw <- alpha_ini
 	alpha.draw.full <- alpha.draw[PIDn]
 	phi.draw <- runif(1, a, b)
-	inv.cor.draw  <- incor(d.site, phi.draw, sph.cor20.site, sizes.noise, sizes.site, size.points)
+	inv.cor.draw  <- incor(d.site, phi.draw, sph.cor20.site)
 	#variance of the uniform prior of phi
 	phi.jump <- (b-a)^2/12
 
@@ -104,7 +105,7 @@ for(j in 1:n.chains){
 			phi.draw <- phi.old
 			inv.cor.draw <- inv.cor.draw.old
 		}else{
-			inv.cor.draw.new <- incor(d.site, phi.new, sph.cor20.site, sizes.noise, sizes.site, size.points)
+			inv.cor.draw.new <- incor(d.site, phi.new, sph.cor20.site)
 			quardterm.value <- quardterm(d.site, alpha.draw, sizes.noise,inv.cor.draw.new)
 			lik.new <- -1/(2*sigma2.alpha.draw)*quardterm.value + 1/2*detterm(d.site, sizes.noise, inv.cor.draw.new)
 			prob.lik.diff <- lik.new-lik.old
