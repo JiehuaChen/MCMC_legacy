@@ -1,13 +1,8 @@
 #data
 #MCMC for multilevel model
 #library(gstat, pos=4)
-library(sp, pos=4)
-library(lattice)
-library(proj4)
-library(RandomFields)
-library(geoR)
+
 require(rgdal)
-library(arm)
 
 #LS regression
 
