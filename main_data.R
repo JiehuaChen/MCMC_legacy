@@ -92,7 +92,7 @@ for(i in 1:N){
 PIDn <- as.numeric(PIDn)
 
 library(fpc)
-dbscan.cl <- dbscan(locations_PID[,1:2], 100, 2)
+dbscan.cl <- dbscan(locations_PID[,1:2], 40, 2)
 table.dbscan <- table(dbscan.cl$cluster)
 d.site<- vector("list", (dim(table.dbscan)[1]-1))
 sph.cor20.site <- vector("list",  (dim(table.dbscan)[1]-1))
@@ -146,6 +146,7 @@ X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12=bio12.scaled, CTI_1K.scale
               NPP_Mean.scaled.depth=NPP_Mean.scaled*log.depth, RELIEF.scaled.depth=RELIEF.scaled*log.depth,lstday.scaled.depth=lstday.scaled*log.depth, lstnight.scaled.depth=lstnight.scaled*log.depth, log.depth=log(aflegacy$Bot))
 X <- as.matrix(X)
 PIDn <- PIDn.new
+
 
 aflegacy.lambertcord <- project(cbind(aflegacy$Lon, aflegacy$Lat), "+proj=laea +datum=WGS84 +lat_0=5 +lon_0=20")
 aflegacy.lambertcord <- aflegacy.lambertcord/1000

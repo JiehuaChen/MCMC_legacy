@@ -5,8 +5,8 @@ library(MASS)
 
 
 ##start of MCMC
-nIter <- 10000
-nBurnin <- 5000
+nIter <- 5000
+nBurnin <- 2500
 thin <- 10
 
 #MCMC iterations
@@ -48,7 +48,7 @@ sigma02 <- 1
 
 #the prior of phi is uniform between [a, b]
 a <- 0.01
-b <- 100
+b <- 40
 
 for(j in 1:n.chains){
 	#inital values
