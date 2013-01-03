@@ -90,7 +90,7 @@ sph.cor20.site <- vector("list",  (dim(table.dbscan)[1]-1))
 
 for(i in 2:dim(table.dbscan)[1]){
 	d.site[[(i-1)]] <- as.matrix(dist(locations_PID[dbscan.cl$cluster==(i-1), 1:2]))
-	sph.cor20.site[[(i-1)]] <- ((1-3/2*d.site[[(i-1)]]/100+1/2*(d.site[[(i-1)]]/100)^3)*(d.site[[(i-1)]]<100))
+	sph.cor20.site[[(i-1)]] <- ((1-3/2*d.site[[(i-1)]]/40+1/2*(d.site[[(i-1)]]/40)^3)*(d.site[[(i-1)]]<40))
 }
 
 
