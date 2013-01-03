@@ -16,10 +16,6 @@ aflegacy <- merge(afhori, afprof.withcov, by="SPID")
 
 #aflegacy <- cbind(aflegacy, lambertx = aflegacy.lambertcord[,1], lamberty = aflegacy.lambertcord[,2])
 aflegacy <- as.data.frame(aflegacy)
-locations <- cbind(x=aflegacy$coords.x1, y=aflegacy$coords.x2)
-locations <- as.data.frame(locations)
-aflegacy <- aflegacy[!is.na(locations$x+locations$y), ]
-locations <- locations[!is.na(locations$x+locations$y), ]
 
  # aflegacy$bio1 <- ifelse(aflegacy$bio1==0, NA, aflegacy$bio1) 
  # aflegacy$bio12 <- ifelse(aflegacy$bio12==0, NA, aflegacy$bio12) 
@@ -39,7 +35,7 @@ aflegacy <-aflegacy[aflegacy$EVI_mask_1==1, ]
 
 index.na <- (1:dim(aflegacy)[1])*is.na(rowSums(aflegacy[, c("SOC", "Bot", "bio1", "bio12", "CTI_1K", "ELEV_1K", "EVIM_1K", "M13RB1ALT", "M13RB2ALT", "M13RB3ALT", "M13RB7ALT", "NPP_Mean_1", "RELIEF_1K", "SLOPE_1K", "lstday", "lstnight")]))
 aflegacy <- aflegacy[-index.na, ]
-aflegacy <- aflegacy[aflegacy$lstday>400, ]
+aflegacy <- aflegacy[aflegacy$lstday<400, ]
 
 logccm <- log(aflegacy$SOC)
 N <- length(logccm)
