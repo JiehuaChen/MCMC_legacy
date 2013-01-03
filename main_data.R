@@ -44,6 +44,7 @@ aflegacy <-aflegacy[aflegacy$EVI_mask_1==1, ]
 
 index.na <- (1:dim(aflegacy)[1])*is.na(rowSums(aflegacy[, c("SOC", "Bot", "bio1", "bio12", "CTI_1K", "ELEV_1K", "EVIM_1K", "M13RB1ALT", "M13RB2ALT", "M13RB3ALT", "M13RB7ALT", "NPP_Mean_1", "RELIEF_1K", "SLOPE_1K", "lstday", "lstnight")]))
 aflegacy <- aflegacy[-index.na, ]
+aflegacy <- aflegacy[aflegacy$lstday>400, ]
 
 logccm <- log(aflegacy$SOC)
 N <- length(logccm)
