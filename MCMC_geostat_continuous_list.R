@@ -1,5 +1,4 @@
 source("main_data.R")
-source("cont_likfunc.R")
 source("invcor_list_v2.R")
 library(MASS)
 
