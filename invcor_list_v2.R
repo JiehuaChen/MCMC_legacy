@@ -1,62 +1,12 @@
-sph.cor.func <- function(d, phi){
-	cor.value <- ((1-3/2*d/phi+1/2*(d/phi)^3)*(d<phi))
-	return(cor.value)
+incor <- function(d.site, phi.draw, sph.cor20.site){
+	#stack diagonally
+	d.site.scaled <- lapply(lapply(d.site, "-"), "/", phi.draw) 
+	cor <- lapply(d.site.scaled, exp)
+	cor.taper <- mapply("*", cor, sph.cor20.site)
+	invcor <- lapply(cor.taper, solve)
+	return(invcor)
 }
 
-loccords.jc <- function(predloc, locations.est.cluster){
-	loc.dif <- cbind(locations.est.cluster[,1]-predloc[1], locations.est.cluster[,2]-predloc[2])
-	dist.dif <- sqrt(rowSums(loc.dif^2))
-	return(dist.dif)
-}
-
-readGDALtiffile <- function(tiffile, offsetvalues){
-	tifdata <- readGDAL(tiffile, band=covar.selected.map, offset=offsetvalues, region.dim=c(1,1), silent=TRUE)@data
-	return(tifdata)
-}
-			
-kg.term <- function(dist.toest, d.site, phi.est, sph.cor20.site, dist.toest.taper.index){
-
-	kg.selected <- rep(0, length(phi.est))
-	kg.var <- rep(0, length(phi.est))
-	if(dist.toest.taper.index[1]>0){
-		sph.toest <-  sph.cor.func(dist.toest[[dist.toest.taper.index[1]]], 100)
-		kg.selected <- rbind(kg.selected, mapply("*", lapply(lapply(1/phi.est, "*", (-dist.toest[[1]])), exp), list(sph.toest)))
-		kg.var <- colSums(kg.selected^2)
-	}
-	
-	if(sum(dist.toest.taper.index[-1]>0)){
-		dist.toest.selected <- dist.toest[dist.toest.taper.index[-1]]
-		dist.toest.taper.index[-1] <- ifelse(dist.toest.taper.index[-1]>0, dist.toest.taper.index[-1]-1, 0)
-
-		d.site.selected <- d.site[dist.toest.taper.index[-1]]
-		sph.cor20.site.selected <- sph.cor20.site[dist.toest.taper.index[-1]] 
-		s <- sum(dist.toest.taper.index>0&dist.toest.taper.index!=1)
-		invcor.trunc.list <- vector("list", s)
-
-		for(i in 1:s){
-			d.site.scaled  <- lapply(1/phi.est,"*", (-d.site.selected[[i]]))
-			cor <- lapply(d.site.scaled, exp)
-			cor.taper <- lapply(cor, "*", (sph.cor20.site.selected[[i]]))
-			invcor <- lapply(cor.taper, solve)
-			cor.toest <-  lapply(lapply(1/phi.est,"*", (-dist.toest.selected[[i]])), exp)
-			sph.toest <-  sph.cor.func(dist.toest.selected[[i]], 100)
-			cor.toest.taper <- lapply( cor.toest,"*", (sph.toest))
-			cor.toest.kg <- mapply("%*%", cor.toest.taper, invcor)
-			kg.selected <- rbind(kg.selected, cor.toest.kg)	
-			kg.var <- kg.var + diag(t(mapply("*",  cor.toest, list(sph.toest)))%*%cor.toest.kg)
-		}	
-	}
-	kg.selected <- kg.selected[-1, ]
-	return(list(kg.selected, kg.var))
-}
-
-
-cond.cor <- function(cor.toest, inv.cor.draw, sigma2.alpha.draw){
-	quadr.term <- mapply(cor)
-	cond.cor.value <- sigma2.alpha.draw
-	
-	
-}
 cov.full <- function(d.site, phi.draw, sph.cor20.site,  sigma2.alpha.draw, sigma2.draw,sizes.noise, sizes.site, size.points){
 	d.site.scaled <- lapply(lapply(d.site, "-"), "/", phi.draw) 
 	cor <- lapply(d.site.scaled, exp)
@@ -165,6 +115,9 @@ incov <- function(d.site, phi.draw, sigma2.alpha.draw, sigma2.draw, sizes.site, 
 	}
 	return(invcov.stack)
 }
+
+
+
 
 
 krige.incov <- function(d.site,phi.draw, sigma2.alpha.draw, sigma2.draw, inv.sph.cor10.site, size.points){
