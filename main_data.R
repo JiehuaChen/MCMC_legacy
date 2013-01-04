@@ -57,9 +57,9 @@ lstday.scaled <- as.vector(scale(aflegacy$lstday))
 lstnight.scaled <- as.vector(scale(aflegacy$lstnight))
 
 Y <- log(aflegacy$SOC)
-X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12=bio12.scaled, CTI_1K.scaled=CTI_1K.scaled, 
+X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12.scaled=bio12.scaled, CTI_1K.scaled=CTI_1K.scaled, 
               ELEV_1K.scaled=ELEV_1K.scaled, EVIM_1K.scaled=EVIM_1K.scaled, M13RB1ALT.scaled=M13RB1ALT.scaled,
-              NPP_Mean.scaled=NPP_Mean.scaled, RELIEF.scaled=RELIEF.scaled, lstday.scaled=lstday.scaled, lstnight.scaled=lstnight.scaled, bio1.scaled.depth=bio1.scaled*log.depth, bio12=bio12.scaled*log.depth, CTI_1K.scaled.depth=CTI_1K.scaled*log.depth, 
+              NPP_Mean.scaled=NPP_Mean.scaled, RELIEF.scaled=RELIEF.scaled, lstday.scaled=lstday.scaled, lstnight.scaled=lstnight.scaled, bio1.scaled.depth=bio1.scaled*log.depth, bio12.scaled.depth=bio12.scaled*log.depth, CTI_1K.scaled.depth=CTI_1K.scaled*log.depth, 
               ELEV_1K.scaled.depth=ELEV_1K.scaled*log.depth, EVIM_1K.scaled.depth=EVIM_1K.scaled*log.depth, M13RB1ALT.scaled.depth=M13RB1ALT.scaled*log.depth,
               NPP_Mean.scaled.depth=NPP_Mean.scaled*log.depth, RELIEF.scaled.depth=RELIEF.scaled*log.depth,lstday.scaled.depth=lstday.scaled*log.depth, lstnight.scaled.depth=lstnight.scaled*log.depth, log.depth=log(aflegacy$Bot))
 X <- as.matrix(X)
@@ -83,14 +83,15 @@ for(i in 1:N){
 PIDn <- as.numeric(PIDn)
 
 library(fpc)
-dbscan.cl <- dbscan(locations_PID[,1:2], 40, 2)
+taper.range <- 40
+dbscan.cl <- dbscan(locations_PID[,1:2], taper.range, 2)
 table.dbscan <- table(dbscan.cl$cluster)
 d.site<- vector("list", (dim(table.dbscan)[1]-1))
 sph.cor20.site <- vector("list",  (dim(table.dbscan)[1]-1))
 
 for(i in 2:dim(table.dbscan)[1]){
 	d.site[[(i-1)]] <- as.matrix(dist(locations_PID[dbscan.cl$cluster==(i-1), 1:2]))
-	sph.cor20.site[[(i-1)]] <- ((1-3/2*d.site[[(i-1)]]/40+1/2*(d.site[[(i-1)]]/40)^3)*(d.site[[(i-1)]]<40))
+	sph.cor20.site[[(i-1)]] <- ((1-3/2*d.site[[(i-1)]]/taper.range+1/2*(d.site[[(i-1)]]/taper.range)^3)*(d.site[[(i-1)]]<taper.range))
 }
 
 
@@ -130,9 +131,9 @@ lstday.scaled <- as.vector(scale(aflegacy$lstday))
 lstnight.scaled <- as.vector(scale(aflegacy$lstnight))
 
 Y <- log(aflegacy$SOC)
-X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12=bio12.scaled, CTI_1K.scaled=CTI_1K.scaled, 
+X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12.scaled=bio12.scaled, CTI_1K.scaled=CTI_1K.scaled, 
               ELEV_1K.scaled=ELEV_1K.scaled, EVIM_1K.scaled=EVIM_1K.scaled, M13RB1ALT.scaled=M13RB1ALT.scaled,
-              NPP_Mean.scaled=NPP_Mean.scaled, RELIEF.scaled=RELIEF.scaled, lstday.scaled=lstday.scaled, lstnight.scaled=lstnight.scaled, bio1.scaled.depth=bio1.scaled*log.depth, bio12=bio12.scaled*log.depth, CTI_1K.scaled.depth=CTI_1K.scaled*log.depth, 
+              NPP_Mean.scaled=NPP_Mean.scaled, RELIEF.scaled=RELIEF.scaled, lstday.scaled=lstday.scaled, lstnight.scaled=lstnight.scaled, bio1.scaled.depth=bio1.scaled*log.depth, bio12.scaled.depth=bio12.scaled*log.depth, CTI_1K.scaled.depth=CTI_1K.scaled*log.depth, 
               ELEV_1K.scaled.depth=ELEV_1K.scaled*log.depth, EVIM_1K.scaled.depth=EVIM_1K.scaled*log.depth, M13RB1ALT.scaled.depth=M13RB1ALT.scaled*log.depth,
               NPP_Mean.scaled.depth=NPP_Mean.scaled*log.depth, RELIEF.scaled.depth=RELIEF.scaled*log.depth,lstday.scaled.depth=lstday.scaled*log.depth, lstnight.scaled.depth=lstnight.scaled*log.depth, log.depth=log(aflegacy$Bot))
 X <- as.matrix(X)
