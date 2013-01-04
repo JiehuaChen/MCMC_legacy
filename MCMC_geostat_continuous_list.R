@@ -47,7 +47,7 @@ sigma02 <- 1
 
 #the prior of phi is uniform between [a, b]
 a <- 0.01
-b <- 40
+b <- taper.range*5
 
 for(j in 1:n.chains){
 	#inital values
