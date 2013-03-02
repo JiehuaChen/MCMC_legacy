@@ -1,4 +1,4 @@
-source("main_data.R")
+source("main_data_Clay.R")
 source("invcor_list_v2.R")
 source("likfunc_nugget.R")
 
@@ -64,6 +64,7 @@ for(j in 1:n.chains){
 
 	alpha_ini <- rep(0, N)
 	alpha.draw <- alpha_ini
+	alpha.draw.full <- alpha.draw[PIDn]
 	linkfunc.hat <- X%*%beta_ini + alpha.draw
 	sigma2_alpha_ini <- runif(1)
 	sigma2.alpha.draw  <- sigma2_alpha_ini
@@ -187,5 +188,5 @@ for(j in 1:n.chains){
 	mcmc.results[,j,] <- cbind(beta.post, alpha.post, sigma2.post, sigma2.alpha.post, phi.post)
 }
 
-
+save("mcmc_results_Clay.RData")
 
