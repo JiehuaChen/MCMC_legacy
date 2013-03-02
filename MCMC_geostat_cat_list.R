@@ -16,6 +16,7 @@ nBurnin <- 2500
 thin <- 10
 
 #MCMC iterations
+Y <- Y/100
 XTX <- t(X)%*%X
 size.points.cluster <- sum(table.dbscan[-1])
 size.points <- sum(table.dbscan)
