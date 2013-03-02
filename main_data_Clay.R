@@ -6,7 +6,7 @@ require(rgdal)
 
 #LS regression
 
-afhori <- read.table("Horizon.csv", header=T, sep=",", stringsAsFactors=FALSE)
+afhori <- read.csv("Horizon.csv", stringsAsFactors=FALSE)
 afprof <- read.table("Profile.csv", header=T, sep=",")
 covprof <- read.table("legacy_profile_withcov.csv", header=T, sep=",")
 
