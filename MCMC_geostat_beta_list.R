@@ -92,16 +92,17 @@ for(j in 1:n.chains){
 		ptm <- proc.time()
 		#draw link function
 		linkfunc.old <- linkfunc.draw
+		ratio.old <- ratio.draw
 		logit.old <- exp(linkfunc.draw)/(1+exp(linkfunc.draw))
-		shape1 <- logit.old*ratio.draw 
-		shape2 <- (1-logit.old)*ratio.draw 
+		shape1 <- logit.old*ratio.old 
+		shape2 <- (1-logit.old)*ratio.old
 		
 		lik.link.old <- log(dbeta(Y, shape1, shape2)) + (dnorm(linkfunc.old, mean = linkfunc.hat, sd =sqrt(sigma2.draw), log = TRUE))
 		linkfunc.new <- linkfunc.draw + rnorm(N, 0, sqrt(linkfunc.jump))		
 		logit.new <- exp(linkfunc.new)/(1+exp(linkfunc.new))
 		shape1 <- logit.new*ratio.draw 
 		shape2 <- (1-logit.new)*ratio.draw 
-		lik.link.new <- log(dbeta(Y, shape1, shape2))+ dnorm(linkfunc.new, mean = linkfunc.hat, sd = sqrt(sigma2.draw), log = TRUE)
+		lik.link.new <- log(dbeta(Y, shape1, shape2)) + (dnorm(linkfunc.new, mean = linkfunc.hat, sd =sqrt(sigma2.draw), log = TRUE))
 		prob.lik.diff <- lik.link.new - lik.link.old
 		prob.lik.diff <- ifelse(is.nan(prob.lik.diff)|is.infinite(prob.lik.diff), 0, prob.lik.diff)
 		jump.link <-  rbinom(N, 1, exp(pmin(prob.lik.diff, 0)))
