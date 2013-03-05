@@ -96,7 +96,7 @@ for(j in 1:n.chains){
 			if(Y[datan]==0){
 				repeat{
 					latent.draw[datan] <- rnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw))
-					if(latent.draw[datan]<=0){
+					if(latent.draw[datan]< 0.01){
 						break
 					}
 				}
@@ -110,13 +110,12 @@ for(j in 1:n.chains){
 				}
 			}
 		} 			
+		
 		res.randef <- latent.draw-alpha.draw.full
-		XTR <- t(X)%*%res.randef
-	
+		XTR <- t(X)%*%res.randef	
 		#draw fixed effect
 		beta.mean <- solve(XTX, XTR)
         beta.draw <- mvrnorm(1, beta.mean, solve(XTX)*sigma2.draw)
-
 
 		#draw random effect		
 		res.fix <- latent.draw-X%*%as.matrix(beta.draw)	
