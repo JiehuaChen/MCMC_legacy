@@ -33,11 +33,11 @@ aflegacy <- as.data.frame(aflegacy)
 aflegacy <-aflegacy[aflegacy$EVI_mask_1==1, ]
 
 
-index.na <- (1:dim(aflegacy)[1])*is.na(rowSums(aflegacy[, c("SOC", "Bot", "bio1", "bio12", "CTI_1K", "ELEV_1K", "EVIM_1K", "M13RB1ALT", "M13RB2ALT", "M13RB3ALT", "M13RB7ALT", "NPP_Mean_1", "RELIEF_1K", "SLOPE_1K", "lstday", "lstnight")]))
+index.na <- (1:dim(aflegacy)[1])*is.na(rowSums(aflegacy[, c("ExBase", "Bot", "bio1", "bio12", "CTI_1K", "ELEV_1K", "EVIM_1K", "M13RB1ALT", "M13RB2ALT", "M13RB3ALT", "M13RB7ALT", "NPP_Mean_1", "RELIEF_1K", "SLOPE_1K", "lstday", "lstnight")]))
 aflegacy <- aflegacy[-index.na, ]
 aflegacy <- aflegacy[aflegacy$lstday<400, ]
 
-logccm <- log(aflegacy$SOC)
+logccm <- log(aflegacy$ExBase)
 N <- length(logccm)
 log.depth <- log(aflegacy$Bot)
 
@@ -56,7 +56,7 @@ SLOPE_1K.scaled <- as.vector(scale(aflegacy$SLOPE_1K))
 lstday.scaled <- as.vector(scale(aflegacy$lstday))
 lstnight.scaled <- as.vector(scale(aflegacy$lstnight))
 
-Y <- log(aflegacy$SOC)
+Y <- log(aflegacy$ExBase)
 X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12.scaled=bio12.scaled, CTI_1K.scaled=CTI_1K.scaled, 
               ELEV_1K.scaled=ELEV_1K.scaled, EVIM_1K.scaled=EVIM_1K.scaled, M13RB1ALT.scaled=M13RB1ALT.scaled,
               NPP_Mean.scaled=NPP_Mean.scaled, RELIEF.scaled=RELIEF.scaled, lstday.scaled=lstday.scaled, lstnight.scaled=lstnight.scaled, bio1.scaled.depth=bio1.scaled*log.depth, bio12.scaled.depth=bio12.scaled*log.depth, CTI_1K.scaled.depth=CTI_1K.scaled*log.depth, 
@@ -111,7 +111,7 @@ for(i in 2:N){
   	}
  }
  
-logccm <- log(aflegacy$SOC)
+logccm <- log(aflegacy$ExBase)
 N <- length(logccm)
 log.depth <- log(aflegacy$Bot)
 
@@ -130,7 +130,7 @@ SLOPE_1K.scaled <- as.vector(scale(aflegacy$SLOPE_1K))
 lstday.scaled <- as.vector(scale(aflegacy$lstday))
 lstnight.scaled <- as.vector(scale(aflegacy$lstnight))
 
-Y <- log(aflegacy$SOC)
+Y <- log(aflegacy$ExBase)
 X <- data.frame(int=1, bio1.scaled=bio1.scaled, bio12.scaled=bio12.scaled, CTI_1K.scaled=CTI_1K.scaled, 
               ELEV_1K.scaled=ELEV_1K.scaled, EVIM_1K.scaled=EVIM_1K.scaled, M13RB1ALT.scaled=M13RB1ALT.scaled,
               NPP_Mean.scaled=NPP_Mean.scaled, RELIEF.scaled=RELIEF.scaled, lstday.scaled=lstday.scaled, lstnight.scaled=lstnight.scaled, bio1.scaled.depth=bio1.scaled*log.depth, bio12.scaled.depth=bio12.scaled*log.depth, CTI_1K.scaled.depth=CTI_1K.scaled*log.depth, 
