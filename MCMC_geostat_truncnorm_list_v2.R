@@ -91,7 +91,7 @@ for(j in 1:n.chains){
 		latent.draw <- rnorm(N, mean = latent.hat, sd =sqrt(sigma2.draw))
 		for(datan in 1:N){
 			if(Y[datan]>0&&Y[datan]<1){
-				latent.draw[datan] <- rnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw))
+				latent.draw[datan] <- Y[datan]
 			}
 			if(Y[datan]==0){
 				repeat{
