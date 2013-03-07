@@ -112,7 +112,7 @@ for(j in 1:n.chains){
 		res.fix.group <-(aggregate(res.fix, list(PID = PIDn), sum))[,2]							
 		Sigma.alpha <- cov.alpha(d.site, inv.cor.draw, sigma2.alpha.draw, as.vector(sigma2.draw), sizes.noise, size.points, PID.sizes.list)
 		chol.Sigma.alpha <- cholcov(Sigma.alpha)
-		alpha.mean <- mean.alpha.func(d.site, Sigma.alpha, sigma2.draw, res.fix.group)
+		alpha.mean <- mean.alpha.func(d.site, Sigma.alpha, as.vector(sigma2.draw), res.fix.group)
 		alpha.draw <- alpha.draw.func(alpha.mean, chol.Sigma.alpha, sizes.noise, sizes.site)
 		
 		#draw phi
