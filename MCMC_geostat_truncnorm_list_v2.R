@@ -100,14 +100,13 @@ for(j in 1:n.chains){
 			if(Y[datan]==1){
 				latent.draw[datan] <- rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), lower=1)				
 			}
-			print(datan)
 		} 			
 		
 		res.randef <- latent.draw-alpha.draw.full
 		XTR <- t(X)%*%res.randef	
 		#draw fixed effect
 		beta.mean <- solve(XTX, XTR)
-        beta.draw <- mvrnorm(1, beta.mean, solve(XTX)*sigma2.draw)
+        beta.draw <- mvrnorm(1, beta.mean, solve(XTX)*as.vector(sigma2.draw))
 
 		#draw random effect		
 		res.fix <- latent.draw-X%*%as.matrix(beta.draw)	
