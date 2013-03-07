@@ -94,8 +94,7 @@ for(j in 1:n.chains){
 				latent.draw[datan] <- Y[datan]
 			}
 			if(Y[datan]==0){
-				latent.draw[datan] <- (rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), upper=0.005))
-							
+				latent.draw[datan] <- (rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), upper=0.005))							
 			}	
 			if(Y[datan]==1){
 				latent.draw[datan] <- rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), lower=1)				
@@ -111,7 +110,7 @@ for(j in 1:n.chains){
 		#draw random effect		
 		res.fix <- latent.draw-X%*%as.matrix(beta.draw)	
 		res.fix.group <-(aggregate(res.fix, list(PID = PIDn), sum))[,2]							
-		Sigma.alpha <- cov.alpha(d.site, inv.cor.draw, sigma2.alpha.draw, sigma2.draw, sizes.noise, size.points, PID.sizes.list)
+		Sigma.alpha <- cov.alpha(d.site, inv.cor.draw, sigma2.alpha.draw, as.vector(sigma2.draw), sizes.noise, size.points, PID.sizes.list)
 		chol.Sigma.alpha <- cholcov(Sigma.alpha)
 		alpha.mean <- mean.alpha.func(d.site, Sigma.alpha, sigma2.draw, res.fix.group)
 		alpha.draw <- alpha.draw.func(alpha.mean, chol.Sigma.alpha, sizes.noise, sizes.site)
