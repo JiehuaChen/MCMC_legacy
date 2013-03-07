@@ -4,7 +4,7 @@ source("likfunc_nugget.R")
 
 
 library(MASS)
-
+library(msm)
 
 ##start of MCMC
 nIter <- 5000
@@ -68,7 +68,7 @@ for(j in 1:n.chains){
 	linkfunc.hat <- X%*%beta_ini + alpha.draw
 	sigma2_alpha_ini <- runif(1)
 	sigma2.alpha.draw  <- sigma2_alpha_ini
-	sigma2_ini <- runif(1)
+	sigma2_ini <- var((Y-X%*%lm.XY$coefficients))
 	sigma2.draw <- sigma2_ini
 
 	phi.draw <- runif(1, a, b)
@@ -94,12 +94,8 @@ for(j in 1:n.chains){
 				latent.draw[datan] <- Y[datan]
 			}
 			if(Y[datan]==0){
-				repeat{
-					latent.draw[datan] <- rnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw))
-					if(latent.draw[datan]< 0.01){
-						break
-					}
-				}
+				latent.draw[datan] <- (rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), upper=0.005))
+							
 			}	
 			if(Y[datan]==1){
 				repeat{
@@ -109,6 +105,7 @@ for(j in 1:n.chains){
 					}
 				}
 			}
+			print(datan)
 		} 			
 		
 		res.randef <- latent.draw-alpha.draw.full
