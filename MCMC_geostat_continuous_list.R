@@ -1,5 +1,12 @@
-source("main_data_ExBase.R")
+# implement MCMC for a multilevel gassian model with a tapered exponential covariance model
+# Y: response; X: explanatory variables including a intercept
+# taper.range is the range for the covariance model; then phi: the spatial correlation range should be smaller than that
+# nIter: number of iterations; nBurnin: number of burn in MCMC results; thin: every thin number of MCMC results are kept
+# invcor_list_v2.R have all the utility functions
+
+
 source("invcor_list_v2.R")
+
 library(MASS)
 
 
@@ -153,5 +160,8 @@ for(j in 1:n.chains){
 	mcmc.results[,j,] <- cbind(beta.post, alpha.post, sigma2.post, sigma2.alpha.post, phi.post)
 }
 
+# save the MCMC results for computing predictions later
+
+save.image("mcmc_results.RData")
 
 

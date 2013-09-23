@@ -1,10 +1,15 @@
-source("main_data_Clay.R")
+# implement MCMC for a multilevel beta model with a tapered exponential covariance model
+# Y: response; X: explanatory variables including a intercept
+# taper.range is the range for the covariance model; then phi: the spatial correlation range should be smaller than that
+# nIter: number of iterations; nBurnin: number of burn in MCMC results; thin: every thin number of MCMC results are kept
+# invcor_list_v2.R have all the utility functions
+
 source("invcor_list_v2.R")
 source("likfunc_nugget.R")
 
 
 library(MASS)
-library(msm)
+
 
 ##start of MCMC
 nIter <- 5000
@@ -62,18 +67,26 @@ for(j in 1:n.chains){
 
 	alpha.draw <- alpha_ini
 	alpha.draw.full <- alpha.draw[PIDn]
-	
-	beta.draw <- beta_ini
-	
 	linkfunc.hat <- X%*%beta_ini + alpha.draw
 	sigma2_alpha_ini <- runif(1)
 	sigma2.alpha.draw  <- sigma2_alpha_ini
-	sigma2_ini <- var((Y-X%*%lm.XY$coefficients))
+	sigma2_ini <- runif(1)
 	sigma2.draw <- sigma2_ini
+	repeat{
+		linkfunc.draw <- X%*%beta_ini + rnorm(N, 0, sqrt(sigma2.draw))
+		ratio.draw <- runif(1, 0, 10)
+		logit.tmp <- exp(linkfunc.draw)/(1+exp(linkfunc.draw))
+		shape1 <- logit.tmp*ratio.draw 
+		shape2 <- (1-logit.tmp)*ratio.draw 	
+		if(is.finite(sum(log(dbeta(Y, shape1, shape2))))){
+			break
+		}		
+	}
+	
+	linkfunc.jump <- rep(sigma2.draw, N)
 
 	phi.draw <- runif(1, a, b)
 	inv.cor.draw  <- incor(d.site, phi.draw, sph.cor20.site)
-
 	#variance of the uniform prior of phi
 	phi.jump <- (b-a)^2/12
 
@@ -81,38 +94,65 @@ for(j in 1:n.chains){
 	k <- 1
  	#index for jump counts
  	p.ct <- 0
- 	last.50p <- rep(NA, 50) 	
+ 	last.50p <- matrix(NA, 50, N+1+1) 	
+		ratio.jump <- 1
+	
 	
 	for(i in 1:nIter){
 		ptm <- proc.time()
+		#draw link function
+		linkfunc.old <- linkfunc.draw
+		logit.old <- exp(linkfunc.draw)/(1+exp(linkfunc.draw))
+		shape1 <- logit.old*ratio.draw
+		shape2 <- (1-logit.old)*ratio.draw
+		lik.link.old <- log(dbeta(Y, shape1, shape2)) + (dnorm(linkfunc.old, mean = linkfunc.hat, sd =sqrt(sigma2.draw), log = TRUE))
 		
-		latent.hat <- X%*%beta.draw + alpha.draw.full
-		# draw latent variables
-		latent.draw <- rnorm(N, mean = latent.hat, sd =sqrt(sigma2.draw))
-		for(datan in 1:N){
-			if(Y[datan]>0&&Y[datan]<1){
-				latent.draw[datan] <- Y[datan]
-			}
-			if(Y[datan]==0){
-				latent.draw[datan] <- (rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), upper=0.005))			
-			}	
-			if(Y[datan]==1){
-				latent.draw[datan] <- rtnorm(1, mean = latent.hat[datan], sd =sqrt(sigma2.draw), lower=1)				
-			}
-		} 			
+		linkfunc.new <- linkfunc.draw + rnorm(N, 0, sqrt(linkfunc.jump))	
+		logit.new <- exp(linkfunc.new)/(1+exp(linkfunc.new))		
+		shape1 <- logit.new*ratio.draw 
+		shape2 <- (1-logit.new)*ratio.draw 		
+		lik.link.new <- log(dbeta(Y, shape1, shape2)) + (dnorm(linkfunc.new, mean = linkfunc.hat, sd =sqrt(sigma2.draw), log = TRUE))		
 		
-		res.randef <- latent.draw-alpha.draw.full
-		XTR <- t(X)%*%res.randef	
+		prob.lik.diff <- lik.link.new - lik.link.old
+		prob.lik.diff <- ifelse(is.nan(prob.lik.diff)|is.infinite(prob.lik.diff), 0, prob.lik.diff)
+		jump.link <-  rbinom(N, 1, exp(pmin(prob.lik.diff, 0)))
+		linkfunc.draw <- linkfunc.new*jump.link + (1-jump.link)*linkfunc.old
+		linkfunc.p <- exp(pmin(prob.lik.diff, 0))
+
+		#draw ratio
+		ratio.old <- ratio.draw
+		logit.draw <- exp(linkfunc.draw)/(1+exp(linkfunc.draw))
+		shape1 <- logit.draw*ratio.old
+		shape2 <- (1-logit.draw)*ratio.old
+		
+		lik.ratio.old <- sum(log(dbeta(Y, shape1, shape2)))
+		
+		ratio.new <- ratio.draw + rnorm(1, 0, sqrt(ratio.jump))
+		ratio.new <- ifelse(ratio.new<0, ratio.old, ratio.new)		
+		shape1 <- logit.draw*ratio.draw 
+		shape2 <- (1-logit.draw)*ratio.draw 
+		
+		lik.ratio.new <- sum(log(dbeta(Y, shape1, shape2)))	
+		prob.lik.diff <- lik.ratio.new - lik.ratio.old
+		prob.lik.diff <- ifelse(is.nan(prob.lik.diff)|is.infinite(prob.lik.diff), 0, prob.lik.diff)
+		jump.link <-  rbinom(N, 1, exp(pmin(prob.lik.diff, 0)))
+		ratio.draw <- ratio.new*jump.link + (1-jump.link)*ratio.old
+		ratio.p <- exp(pmin(prob.lik.diff, 0))
+		
+		res.randef <- linkfunc.draw - alpha.draw.full
+		XTR <- t(X)%*%res.randef
+	
 		#draw fixed effect
 		beta.mean <- solve(XTX, XTR)
-        beta.draw <- mvrnorm(1, beta.mean, solve(XTX)*as.vector(sigma2.draw))
+        beta.draw <- mvrnorm(1, beta.mean, solve(XTX)*sigma2.draw)
+
 
 		#draw random effect		
-		res.fix <- latent.draw-X%*%as.matrix(beta.draw)	
+		res.fix <- linkfunc.draw- X%*%as.matrix(beta.draw)	
 		res.fix.group <-(aggregate(res.fix, list(PID = PIDn), sum))[,2]							
-		Sigma.alpha <- cov.alpha(d.site, inv.cor.draw, sigma2.alpha.draw, as.vector(sigma2.draw), sizes.noise, size.points, PID.sizes.list)
+		Sigma.alpha <- cov.alpha(d.site, inv.cor.draw, sigma2.alpha.draw, sigma2.draw, sizes.noise, size.points, PID.sizes.list)
 		chol.Sigma.alpha <- cholcov(Sigma.alpha)
-		alpha.mean <- mean.alpha.func(d.site, Sigma.alpha, as.vector(sigma2.draw), res.fix.group)
+		alpha.mean <- mean.alpha.func(d.site, Sigma.alpha, sigma2.draw, res.fix.group)
 		alpha.draw <- alpha.draw.func(alpha.mean, chol.Sigma.alpha, sizes.noise, sizes.site)
 		
 		#draw phi
@@ -145,14 +185,16 @@ for(j in 1:n.chains){
 		print(phi.jump)	
 
 		p.ct <- p.ct+1
-		last.50p[p.ct] <- phi.p
+		last.50p[p.ct, ] <- c(linkfunc.p, ratio.p, phi.p)
 		if(p.ct==50){
 			p.ct <- 0
 		#	jump.d <- c(beta.jump, alpha.jump, phi.jump,error.jump)
-			jump.d <- phi.jump
-			p.mean <- mean(last.50p)
+			jump.d <- c(linkfunc.jump, ratio.jump, phi.jump)
+			p.mean <- colMeans(last.50p)
 			jump.d <- pmax(pmin(log(0.4)*jump.d/log(p.mean), 10*jump.d), 0.0001)
-			phi.jump <- jump.d
+			linkfunc.jump <- jump.d[1:N]
+			ratio.jump <- jump.d[(N+1)]
+			phi.jump <- jump.d[(N+2)]
 		}		
 		#draw standard deviations
 		alpha.draw.full <- alpha.draw[PIDn]	
@@ -180,5 +222,5 @@ for(j in 1:n.chains){
 	mcmc.results[,j,] <- cbind(beta.post, alpha.post, sigma2.post, sigma2.alpha.post, phi.post)
 }
 
-save("mcmc_results_Clay.RData")
+save.image("mcmc_results_Clay.RData")
 
